@@ -43,18 +43,6 @@ Webpack 有以下几个核心概念：
 
 ## 3. 实现
 
-https://juejin.im/post/5ad1ef5d518825556534f137
-
-https://juejin.im/post/5b304f1f51882574c72f19b0
-
-https://juejin.im/entry/5b63eb8bf265da0f98317441
-
-https://juejin.im/post/5b7296566fb9a0099e7117e0
-
-https://juejin.im/entry/5b552985f265da0f697036b2
-
-https://juejin.im/entry/5b51349c6fb9a04f8c5ed81e
-
 ### 3.1 基础环境
 
 1. 初始化生成一个 `package.json` 文件。
