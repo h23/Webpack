@@ -21,12 +21,26 @@ module.exports={
                 use: {
                     loader: "babel-loader",  //指明要使用的loader
                     options: {               //传入loader的参数
-                        presets: [
+                        presets: [           //用于解析一组语法特性
                             [
-                                "env",
-                                {modules: false}  //关闭Babel的模块转换功能，保留原本的ES6模块化语法
+                                "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                                {
+                                    "targets": {   //指定需要兼容的浏览器类型和版本
+                                        "browsers": [
+                                            "> 1%",     //支持市场份额超过1％的浏览器。
+                                            "ie >= 9"   //支持IE9以上的版本
+                                        ]
+                                    },
+                                    modules: false   //关闭Babel的模块转换功能，保留原本的ES6模块化语法
+                                }
                             ],
                             "react"
+                        ],
+                        plugins: [         //用于解析某个语法特性
+                            "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                            "transform-export-extensions",  //解析额外的export语法
+                            "transform-class-properties",   //解析class中的静态属性
+                            "syntax-dynamic-import"         //解析import方法
                         ]
                     }
                 }
@@ -40,7 +54,7 @@ module.exports={
                 ],
             },
             {
-                test: /\.(png|svg|jpg|gif|woff|tff|)$/,
+                test: /\.(png|svg|jpg|gif)$/,
                 use: [
                     {
                         loader: 'url-loader',
@@ -53,11 +67,22 @@ module.exports={
                     'image-webpack-loader'        //压缩图片
                 ]
             },
+            {
+                test: /\.(eot|ttf|woff|svg)$/,
+                use: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: 1024 * 30,         //30KB 以下的文件采用 url-loader
+                        fallback: 'file-loader',  //否则采用 file-loader，默认值就是 file-loader
+                        outputPath: 'fonts',      //图片输出路径
+                    }
+                }]
+            },
         ]
     },
     plugins:[
         new HtmlWebpackPlugin({
-            chunks: ['A','common','vendor'],           //要引入的chunk
+            chunks: ['A','common','vendor'],           //引入拆分出来的chunk
             filename:'A.html',       //生成的文件名
             template:'template.html',  //模板文件
             minify:{                   //压缩输出

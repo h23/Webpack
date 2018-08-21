@@ -8,7 +8,7 @@ class B extends Component {
         return (
             <div>
                 <h1>Hello word! I'm B.</h1>
-                { funcB() }
+                {funcB()}
                 <img src={require('../../assets/images/icon.jpg')} alt=""/>
             </div>
         );

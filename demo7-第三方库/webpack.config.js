@@ -20,7 +20,26 @@ module.exports={
                 use: {
                     loader: "babel-loader",  //指明要使用的loader
                     options: {               //传入loader的参数
-                        presets: ["env","react"] //用于解析ES6+React
+                        presets: [           //用于解析一组语法特性
+                            [
+                                "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                                {
+                                    "targets": {   //指定需要兼容的浏览器类型和版本
+                                        "browsers": [
+                                            "> 1%",     //支持市场份额超过1％的浏览器。
+                                            "ie >= 9"   //支持IE9以上的版本
+                                        ]
+                                    }
+                                }
+                            ],
+                            "react"
+                        ],
+                        plugins: [         //用于解析某个语法特性
+                            "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                            "transform-export-extensions",  //解析额外的export语法
+                            "transform-class-properties",   //解析class中的静态属性
+                            "syntax-dynamic-import"         //解析import方法
+                        ]
                     }
                 }
             },
@@ -42,13 +61,24 @@ module.exports={
                 use: ['style-loader','css-loader', 'sass-loader']  //处理顺序:sass-loader->css-loader->style-loader
             },
             {
-                test: /\.(png|svg|jpg|gif|woff|tff|)$/,
+                test: /\.(png|svg|jpg|gif)$/,
                 use: [{
                     loader: 'url-loader',
                     options: {
                         limit: 1024 * 30,         //30KB 以下的文件采用 url-loader
                         fallback: 'file-loader',  //否则采用 file-loader，默认值就是 file-loader
                         outputPath: 'images',     //图片输出路径
+                    }
+                }]
+            },
+            {
+                test: /\.(eot|ttf|woff|svg)$/,
+                use: [{
+                    loader: 'url-loader',
+                    options: {
+                        limit: 1024 * 30,         //30KB 以下的文件采用 url-loader
+                        fallback: 'file-loader',  //否则采用 file-loader，默认值就是 file-loader
+                        outputPath: 'fonts',      //图片输出路径
                     }
                 }]
             },
