@@ -1,8 +1,12 @@
+/**
+ * Created by admin on 2018/8/21.
+ */
+import React from 'react';
 
 export function funcA() {
-    return "I'm funcA";
+    return <h1>I'm funcA</h1>;
 }
 
-export function funB() {
-    return "I'm funcB";
+export function funcB() {
+    return <h1>I'm funcB</h1>;
 }

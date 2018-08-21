@@ -35,11 +35,10 @@ Webpack 有以下几个核心概念：
 1. 使用ES6语言
 2. 使用React框架
 3. 为单页应用生成HTML
-4. 管理多个单页应用
-5. webpack-dev-server
-6. 加载样式（CSS、SCSS）
-7. 加载静态资源（图片、字体）
-8. 其他（clean,merge,source map）
+4. webpack-dev-server
+5. 加载样式（CSS、SCSS）
+6. 加载静态资源（图片、字体）
+7. 其他（clean,merge,source map）
 
 ## 3. 实现
 
@@ -246,7 +245,9 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
 
 ### 3.4 自动生成HTML
 
-使用web-webpack-plugin.WebPlugin 自动生成HTML，并引入JS文件。
+#### 3.4.1 单个页面
+
+使用html-webpack-plugin 自动生成HTML，并引入相应文件。
 
 1. 将index.html移到src目录下，并重命名：
 
@@ -276,20 +277,19 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
 3. 本地安装web-webpack-plugin
 
    ```
-   npm i -D web-webpack-plugin
+   npm i -D html-webpack-plugin
    ```
 
 4. webpack配置
 
    ```
-   const { WebPlugin } = require('web-webpack-plugin');  //引入插件
+   const HtmlWebpackPlugin = require('html-webpack-plugin');  //引入插件
    
    plugins:[
-           new WebPlugin({
-               filename: 'index.html',         //生成的HTML文件名
-               template: './src/template.html',    //使用的模板
-           }),
-       ],
+       new HtmlWebpackPlugin({
+       	template:'src/index.html',  //html模板
+       })
+   ]
    ```
 
 5. 编译
@@ -304,131 +304,15 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
    </head>
    <body>
    <div id="app"></div>
-   <script src="bundle.js"></script>   //自动引入JS文件
+   <script type="text/javascript" src="bundle.js"></script>   //自动引入JS文件
    
    </body>
    </html>
-   
    ```
 
-### 3.5 管理多个单页应用
+#### 3.4.2 多个页面
 
-#### 3.5.1 多个入口，多出口
-
-1. 将index.html移到src目录下，并重命名：
-
-   ```
-   │  package.json
-   │  webpack.config.js
-   ├─dist
-   └─src
-           A.js
-           B.js
-           template.html
-   ```
-
-2. JS文件内容：
-
-   ```
-   A.js:
-   import React, { Component } from 'react';
-   import ReactDOM from 'react-dom';
-   
-   class A extends Component {
-       render() {
-           return <h1>Hello word! I'm A.</h1>
-       }
-   }
-   ReactDOM.render(<A />, document.getElementById('A'));
-   
-   B.js:
-   import React, { Component } from 'react';
-   import ReactDOM from 'react-dom';
-   
-   class B extends Component {
-       render() {
-           return <h1>Hello word! I'm B.</h1>
-       }
-   }
-   ReactDOM.render(<B />, document.getElementById('B'));
-   ```
-
-3. template.html 内容：
-
-   ```
-   <html>
-   <head>
-     <meta charset="UTF-8">
-     <title>多入口</title>
-   </head>
-   <body>
-   <div id="A"></div>
-   <div id="B"></div>
-   </body>
-   </html>
-   ```
-
-4. 配置webpack
-
-   ```
-   entry:{
-       A:'src/A.js',     //每个入口以及其依赖的所有module形成一个chunk，chunk名=属性名
-       B:'src/B.js'
-   },
-   output:{
-       path:path.resolve(__dirname,'dist'),
-       filename:'[name].bundle.js'  //[name]代表chunk名称
-   },
-   plugins: [
-           new WebPlugin({
-               filename: 'index.html',         
-               template: './src/template.html',  
-               requires: ['A', 'B'],           //自动引入的JS文件，chunk名
-           }),
-   ],
-   ```
-
-5. 编译
-
-6. 编译后的目录结构
-
-   ```
-   │  package.json
-   │  webpack.config.js
-   ├─dist
-   │  	   A.bundle.js
-   │  	   B.bundle.js
-   │  	   index.html
-   └─src
-           A.js
-           B.js
-           template.html
-   ```
-
-7. 编译后生成的index.html
-
-   ```
-   <html>
-   <head>
-     <meta charset="UTF-8">
-     <title>多入口</title>
-   </head>
-   <body>
-   <div id="A"></div>
-   <div id="B"></div>
-   
-   
-   <script src="A.bundle.js"></script>   //自动引入生成的JS文件
-   <script src="B.bundle.js"></script>
-   </body>
-   </html>
-   ```
-
-#### 3.5.2 多个单页应用 
-
-实际应用会按照功能模块划分成多个单页应用，每个单页应用生成一个 HTML 文件。并且随着业务的发展更多的单页应用可能会逐渐被加入到项目中去。 
-
-使用web-webpack-plugin.AutoWebPlugin自动管理多个单页应用。
+如果单页应用中需要多个页面入口，或者多页应用时配置多个html时，那么就需要实例化该插件多次。
 
 1. 目录结构要求：
 
@@ -437,58 +321,66 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
    │  webpack.config.js
    │  template.html
    ├─dist
-   └─src                   //所有单页应用的代码都需要放到一个目录下
-       ├─A                 //一个单页应用一个单独的文件夹
-       │      index.js     //每个单页应用的目录下都有一个 index.js 文件作为入口执行文件
+   └─src                   
+       ├─A                 
+       │      A.js 
        └─B
-              index.js
+              B.js
    ```
 
 2. 配置webpack
 
    ```
-   const { AutoWebPlugin } = require('web-webpack-plugin');
+   const HtmlWebpackPlugin = require('html-webpack-plugin');  //引入插件
    
-   const autoWebPlugin = new AutoWebPlugin('src', {
-       template: './template.html', // HTML 模版文件所在的文件路径
-   });
-   
-   module.exports={
-       // AutoWebPlugin 会为寻找到的所有单页应用，生成对应的入口配置，
-       // autoWebPlugin.entry 方法可以获取到所有由 autoWebPlugin 生成的入口配置
-       entry: autoWebPlugin.entry({
-           // 这里可以加入你额外需要的 Chunk 入口
+   entry: {                           //多入口使用对象形式配置，chunk名称为key值
+           A: './src/pages/A/A.js',
+           B: './src/pages/B/B.js',
+   },
+   output:{                   
+           filename:'[name].bundle.js',  //[name]代表chunk名称
+           path: path.resolve(__dirname, 'dist')
+   },
+       
+   plugins:[
+       new HtmlWebpackPlugin({
+           chunks: ['A'],           //要引入的chunk
+           filename:'A.html',       //生成的文件名
+           template:'template.html',  //模板文件
        }),
-       plugins: [
-           autoWebPlugin,
-       ],
-   };
+       new HtmlWebpackPlugin({
+           chunks:['B'],
+           filename:'B.html',
+           template:'template.html'
+       }),
+   ]
    ```
 
-3. 编译
-
-4. 编译后的目录结构
+3. 编译后的目录结构
 
    ```
    │  package.json
    │  webpack.config.js
    │  template.html
    ├─dist
-   │      A.bundle.js
-   │      A.html
-   │      B.bundle.js
-   │      B.html
-   └─src
-           A.js
-           B.js
-           template.html
+   |	A.bundle.js
+   |	A.html
+   │  	B.bundle.js
+   │  	B.html
+   └─src                   
+       ├─A                 
+       │      A.js 
+       └─B
+              B.js
    ```
 
-### 3.6 Webpack-dev-server
+### 3.5 Webpack-dev-server
 
 webpack-dev-server提供了一个简单的服务器，用于访问 webpack 构建好的静态文件，我们日常开发时可以使用它来调试前端代码。 webpack-dev-server将构建好的项目存在内存中。
 
 DevServer 支持模块热替换, 可在不刷新整个网页的情况下实时预览页面。 原理是当一个源码发生变化时，只重新编译发生变化的模块，再用新输出的模块替换掉浏览器中对应的老模块。 
+
+#### 3.5.1 devServer
 
 1. 本地安装devServer
 
@@ -512,7 +404,7 @@ DevServer 支持模块热替换, 可在不刷新整个网页的情况下实时�
            host: '0.0.0.0',           //DevServer 服务监听的地址，默认是localhost。当需要同个局域网可访问你的服务时，可设成0.0.0.0
            port: 3000,                //DevServer 服务监听的端口，默认8080
            https: false,              //是否使用HTTPS服务
-           open: true                 //自动打开网页
+           open: true                 //自动打开网页，地址是host:port
    },
    
    只有在通过 DevServer 去启动 Webpack 时配置文件里 devServer 才会生效，因为这些参数所对应的功能都是 DevServer 提供的，Webpack 本身并不认识 devServer 配置项。 
@@ -524,14 +416,36 @@ DevServer 支持模块热替换, 可在不刷新整个网页的情况下实时�
    package.json 的 script字段添加如下：
    "dev": "webpack-dev-server"
    
-   执行 npm run dev
+   执行 npm run dev bug：会自动打开http://0.0.0.0:3000
    ```
 
-### 3.7 加载样式
+4. http://192.168.1.87:3000/A.html
+
+#### 3.5.1 open-browser-webpack-plugin 
+
+1. 本地安装
+
+   ```
+   npm i -D open-browser-webpack-plugin
+   ```
+
+2. 配置webpack
+
+   ```
+   const OpenBrowserPlugin = require('open-browser-webpack-plugin');
+   
+   plugins: [
+       new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' })  //开启服务后，自动打开的地址
+   ]
+   ```
+
+3. 执行 npm run dev后，会自动打开http://192.168.1.87:3000/A.html页。
+
+### 3.6 加载样式
 
 webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
 
-#### 3.7.1 加载CSS
+#### 3.6.1 加载CSS
 
 处理css文件，需要用到以下两个loader：
 
@@ -551,13 +465,22 @@ webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
            rules: [
                {
                    test: /\.css$/,    //使用正则匹配所有需要使用此loader的文件
-                   use: ['style-loader','css-loader']  //先由css-loader处理后，在交给style-loader处理
-               }
+                   use: [             //先由css-loader处理后，在交给style-loader处理
+                       'style-loader',
+                       {
+                           loader:'css-loader',
+                           options:{           //传入css-loader的参数
+                               minimize:true,  //是否压缩css代码
+                               module:true     //是否使用css module
+                           }
+                       }
+                   ]
+               },
            ]
        },
    ```
 
-#### 3.7.2 加载SCSS
+#### 3.6.2 加载SCSS
 
 先将SCSS转成CSS，后续处理同上。
 
@@ -580,7 +503,9 @@ webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
        },
    ```
 
-### 3.8 加载静态资源
+### 3.7 加载静态资源
+
+#### 3.7.1 file-loader & url-loader
 
 file-loader, url-loader可用于处理图片，字体等静态资源。
 
@@ -614,6 +539,58 @@ url-loader封装了file-loader：
        ]
    },
    ```
+
+3. 编译后:
+
+   * 大于30KB的图片，用file-loader处理，复制到dist/images目录下。
+   * 小于30KB的图片，和js一起打包，形成dataURL形式。
+
+#### 3.7.2 copy-webpack-plugin
+
+将不需要webpack处理的静态资源，原样输出到指定目录下。
+
+1. 本地安装
+
+   ```
+   npm i copy-webpack-plugin -D
+   ```
+
+2. 配置webpack
+
+   ```
+   const CopyWebpackPlugin = require('copy-webpack-plugin');
+   
+   plugins:[
+       new CopyWebpackPlugin([{
+           from:path.resolve(__dirname, 'src/assets/public'),  //将此目录下的文件
+           to:'./public'                            //输出到此目录，相对于output的path目录
+       }])
+   ]
+   ```
+
+3. 编译后 src/assets/public 下的文件将原封不动的输出到 dist/public 目录下。
+
+### 3.8 第三方库
+
+通过ProvidePlugin引用某些模块作为应用运行时的变量，从而不必每次都用 `require` 或者 `import`, 是内置的插件。
+
+1. 安装jquery
+
+   ```
+   npm i -D jquery
+   ```
+
+2. 配置webpack
+
+   ```
+   plugins:[
+       new webpack.ProvidePlugin({
+         $: 'jquery', 
+       })
+   ]
+   ```
+
+3. 在JS文件中就可直接使用jquery，不用导入。
 
 ### 3.9 其他
 
@@ -734,7 +711,7 @@ module.exports = {
 1. 本地安装插件
 
    ```
-   npm i -D mini-css-extract-plugin OptimizeCSSAssetsPlugin UglifyJsPlugin
+   npm i -D mini-css-extract-plugin optimize-css-assets-webpack-plugin uglifyjs-webpack-plugin
    ```
 
 2. 配置webpack：分离css文件
@@ -782,14 +759,45 @@ module.exports = {
 
 #### 4.2.3 压缩HTML文件
 
-web-webpack-plugin的WebPlugin & AutoWebPlugin都支持压缩输出的HTML文件。
+HtmlWebpackPlugin支持压缩输出的HTML文件。
 
 ```
-const autoWebPlugin = new AutoWebPlugin('./src/pages', {
-    template: './template.html', 
-    htmlMinify: true  //压缩生成的HTML代码
-});
+ plugins:[
+    new HtmlWebpackPlugin({
+    	template:'src/index.html', 
+    	minify:{                     //压缩输出
+            collapseWhitespace:true   //折叠空白区域
+    	}
+    })
+]
 ```
+
+#### 4.2.4 压缩图片
+
+1. 本地安装
+
+   ```
+   npm i -D image-webpack-loader
+   ```
+
+2. 配置webpack
+
+   ```
+   {
+       test: /\.(png|svg|jpg|gif|woff|tff|)$/,
+       use: [
+           {
+               loader: 'url-loader',
+               options: {
+               limit: 1024 * 30,         
+               fallback: 'file-loader',  
+               outputPath: 'images',    
+               }
+           },
+       	'image-webpack-loader'        //压缩图片
+       ]
+   },
+   ```
 
 ### 4.3 Tree Sharing
 
@@ -797,13 +805,15 @@ Tree Shaking 可以用来剔除 JavaScript 中用不上的代码。
 
 Tree Shaking要求：
 
-- 使用 ES2015 模块语法（即 `import` 和 `export`）。
+- 必须遵循 ES6 的模块规范（即 import 和 export）。
 - 在项目 `package.json` 文件中，添加一个 "sideEffects" 属性。
 - 引入一个能够删除未引用代码(dead code)的压缩工具(minifier)（例如 `UglifyJSPlugin`）。
 
 1. 新建util.js
 
    ```
+   import React from 'react';
+   
    export function funcA() {
        return <h1>I'm funcA</h1>;
    }
@@ -819,15 +829,7 @@ Tree Shaking要求：
    import {funcA} from '../util';
    ```
 
-3. package.json添加sideEffects字段： 将文件标记为无副作用
-
-   ```
-   "sideEffects": false,
-   ```
-
-4. 开启压缩，参照4.2.1
-
-5. 修改babel-loader配置。
+3. 修改babel-loader配置。
 
    ```
    presets: [ 
@@ -837,17 +839,23 @@ Tree Shaking要求：
        ],
        "react"
    ]
+   
+   但import引入的样式文件就被去掉了，改成通过require引入。
    ```
+
+4. package.json添加sideEffects字段： 将文件标记为无副作用
+
+   ```
+   "sideEffects": false,
+   ```
+
+5. 开启压缩，参照4.2.1
 
    执行编译后，A.bundle.js无funcB相关代码。
 
 ### 4.4 提取公共代码
 
-如何提取公共代码：
-
-- 根据所使用的技术栈，找出所有页面都需要用到的基础库。如react、react-dom 等库，把它们提取到一个单独base.js文件。 
-- 在剔除了各个页面中被 base.js 包含的部分代码外，再找出所有页面都依赖的公共部分的代码提取出来放到 common.js中去。
-- 再为每个页面都生成一个单独的文件，这个文件中不再包含 base.js 和 common.js中包含的部分，而只包含各个页面单独需要的部分代码。
+提取公共代码的原理：用户第一次访问页面后，页面公共代码的文件已经被浏览器缓存起来。用户切换到其它页面时，存放公共代码的文件就不会再重新加载，而是直接从缓存中获取。 加快了其他页面的访问速度，减少了网络传输流量。
 
 webpack 4.X 会默认对代码进行拆分，拆分的规则是：
 
@@ -856,7 +864,73 @@ webpack 4.X 会默认对代码进行拆分，拆分的规则是：
 - 在按需加载时，请求数量小于等于5。
 - 在初始化加载时，请求数量小于等于3。
 
-可通过optimization.splitChunks自定义配置。webpack 4.x之前可用CommonsChunkPlugin。
+webpack 4.x 通过optimization.splitChunks配置, webpack 4.x之前可用CommonsChunkPlugin。
+
+简单配置：
+
+```
+optimization: {
+    splitChunks: {
+      chunks: "all", // 所有的 chunks 代码公共的部分分离出来成为一个单独的文件
+    },
+  },
+}
+```
+
+建议将公共使用的第三方类库显式地配置为公共的部分:
+
+- 根据所使用的技术栈，找出所有页面都需要用到的基础库。如react、react-dom 等库，把它们提取到一个单独vendor.js文件。 
+- 在剔除了各个页面中被 vendor.js 包含的部分代码外，再找出所有页面都依赖的公共部分的代码提取出来放到 common.js中去。
+- 再为每个页面都生成一个单独的文件，这个文件中不再包含 vendor.js 和 common.js中包含的部分，而只包含各个页面单独需要的部分代码。
+
+```
+optimization: {
+    splitChunks: {
+            cacheGroups: {           //缓存组
+                commons: {           //提取入口文件之间的公共代码
+                    chunks: 'all',   //块的范围，有三个可选值：initial、async、all，默认为all
+                    minChunks: 2,    //被引用次数
+                    minSize: 0,      //文件大小
+                    name: "common"   //拆分出来块的名字
+                },
+                vendor: {
+                    chunks: "all",
+                    test: /node_modules/,//控制哪些模块被这个缓存组匹配到
+                    name: "vendor",
+                    priority: 10,
+                },
+            },
+        }
+}
+```
+
+```
+new HtmlWebpackPlugin({
+    chunks: ['A','common','vendor'],           //引入拆分出来的chunk
+    filename:'A.html',      
+    template:'template.html', 
+    minify:{                 
+    	collapseWhitespace:true  
+    }
+}),
+```
+
+编译完成后dist目录结构如下：
+
+```
+│  A.bundle.js
+│  A.css
+│  A.html
+│  B.bundle.js
+│  B.css
+│  B.html
+│  common.bundle.js           //A和B之间的公共代码
+│  vendor.bundle.js           //node_modules下的第三方依赖代码
+├─images
+│      230280f0ff880c8273b99fdae150dc96.png
+└─public
+        ico.png
+```
 
 ### 4.5 优化loader配置
 
@@ -898,7 +972,6 @@ module.exports = {
     modules: [path.resolve(__dirname, 'node_modules')]
   },
 };
-
 ```
 
 #### 4.6.2 resolve.extensions
@@ -923,14 +996,14 @@ extensions: ['.js', '.json']
 module.exports = {
   resolve: {
     // 尽可能的减少后缀尝试的可能性
-    extensions: ['js'],
+    extensions: ['.js'],
   },
 };
 ```
 
 #### 4.6.3 resolve.alias
 
-`resolve.alias` 配置项通过别名来把原导入路径映射成一个新的导入路径，可简化import路径。
+`resolve.alias` 配置项通过别名来把原导入路径映射成一个新的导入路径，可简化import/require路径。
 
 ```
 resolve:{
@@ -942,5 +1015,40 @@ resolve:{
 
 `import img from 'assets/images/1.png'` ==> `import img from 'xx/src/assets/images/1.png'`。
 
+css中的url不支持。
 
+### 4.7 Eslint
 
+引入ESlint进行代码检查 。
+
+1. 本地安装
+
+   ```
+   npm i -D eslint eslint-loader eslint-plugin-react
+   
+   ```
+
+2. 初始化eslint配置
+
+   ```
+   eslint --init
+   ```
+
+3. 配置webpack
+
+   ```
+   use: [
+       {
+           loader: "babel-loader", 
+           options: {              
+               presets: [          
+                   ["env",{modules: false}],  
+                    "react"
+               ]
+        	}
+       },
+       "eslint-loader"          //先使用eslint-loader处理后，在由babel-loader转换
+   ],
+   ```
+
+4. 编译时会用eslint进行代码检查，并显示错误。
