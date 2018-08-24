@@ -4,8 +4,9 @@ require('./a.css');
 import { funcA } from '../../util';
 
 class A extends Component {
+
     render() {
-        $("body").css("background-color","gray")
+        $("body").css("background-color","gray");
         return <h1><i></i>Hello word! I'm A. {funcA()}</h1>
     }
 }

@@ -2,7 +2,6 @@ const path=require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 
 
 module.exports={
@@ -47,7 +46,7 @@ module.exports={
             {
                 test: /\.(sc|c)ss$/,
                 use: [
-                    MiniCssExtractPlugin.loader,   //style-loader改用MiniCssExtractPlugin
+                    'style-loader',
                     'css-loader',
                     'sass-loader',
                 ],
@@ -93,9 +92,6 @@ module.exports={
         }]),
         new webpack.ProvidePlugin({
             $: 'jquery',
-        }),
-        new MiniCssExtractPlugin({
-            filename: "[name].css",    //同output.filename
         }),
     ],
 };

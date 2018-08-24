@@ -18,5 +18,5 @@ module.exports = merge(common, {
         https: false,              //是否使用HTTPS服务
         open: false                 //自动打开网页
     },
-    devtool: "cheap-module-eval-source-map"
+    devtool: "source-map"
 });

@@ -1,7 +1,14 @@
-let A = [1,2,3];
-coding = ()=>{
-    console.log(...A);
-    return `${A} I'm coding`;
+class Ui {
+    constructor(name, age) {
+        this.name = name;
+        this.age = age;
+    }
+
+    coding() {
+        return `${this.name} is coding`;
+    }
 }
 
-document.getElementById('app').innerText=coding();
+let ui= new Ui('hqz','18');
+
+document.getElementById('app').innerText=ui.coding();

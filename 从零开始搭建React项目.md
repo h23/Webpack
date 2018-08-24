@@ -32,17 +32,22 @@ Webpack 有以下几个核心概念：
 
 ## 2. 项目需求
 
+使用Webpack 4.x 搭建项目，满足以下需求：
+
 1. 使用ES6语言
 2. 使用React框架
-3. 为单页应用生成HTML
+3. 自动生成HTML
 4. webpack-dev-server
 5. 加载样式（CSS、SCSS）
 6. 加载静态资源（图片、字体）
-7. 其他（clean,merge,source map）
+7. 使用第三方库
+8. 其他（clean,merge,source map）
 
-## 3. 实现
+## 3. 实战
 
 ### 3.1 基础环境
+
+NodeJS版本10.4.1。
 
 1. 初始化生成一个 `package.json` 文件。
 
@@ -108,9 +113,9 @@ Webpack 有以下几个核心概念：
        }
    }
    
-   let hqz= new Ui('hqz','18');
+   let ui= new Ui('hqz','18');
    
-   document.getElementById('app').innerText=hqz.coding();
+   document.getElementById('app').innerText=ui.coding();
    ```
 
 3. index.html 内容：
@@ -152,12 +157,13 @@ Webpack 有以下几个核心概念：
 1. 把新的 ES6 语法用 ES5 实现。
 2. 给新的 API 注入 polyfill。
 
-babel可以方便的完成以上2件事。 
+babel可以方便的完成以上2件事。 babel-preset-env的工作方式类似于babel-preset-latest，但它允许您指定环境并仅转换该环境中缺少的功能。
 
 1. 本地安装Babel
 
    ```
    npm i -D babel-loader babel-core babel-preset-env
+   babel-plugin-transform-object-rest-spread babel-plugin-transform-export-extensions babel-plugin-transform-class-properties babel-plugin-syntax-dynamic-import
    ```
 
 2. 配置webpack
@@ -170,7 +176,25 @@ babel可以方便的完成以上2件事。
                use: {
                    loader: "babel-loader",  //指明要使用的loader
                    options: {               //传入loader的参数
-                       presets: ["env"]
+                       presets: [           //用于解析一组语法特性
+                           [
+                               "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                               {
+                                   "targets": {   //指定需要兼容的浏览器类型和版本
+                                       "browsers": [
+                                           "> 1%",     //支持市场份额超过1％的浏览器。
+                                           "ie >= 9"   //支持IE9以上的版本
+                                       ]
+                                   }
+                               }
+                           ]
+                       ],
+                       plugins: [         //用于解析某个语法特性
+                           "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                           "transform-export-extensions",  //解析额外的export语法
+                           "transform-class-properties",   //解析class中的静态属性
+                           "syntax-dynamic-import"         //解析import方法
+                       ]
                    }
                }
    
@@ -188,8 +212,6 @@ babel可以方便的完成以上2件事。
    ```
 
    编译完成后，dist文件夹下多出一个bundle.js文件，打包成功。
-
-`presets` 属性告诉 Babel 要转换的源码使用了哪些新的语法特性。env 包含当前所有 ECMAScript 标准里的最新特性。
 
 ### 3.3 React
 
@@ -274,7 +296,7 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
    </html>
    ```
 
-3. 本地安装web-webpack-plugin
+3. 本地安装
 
    ```
    npm i -D html-webpack-plugin
@@ -394,7 +416,7 @@ DevServer 支持模块热替换, 可在不刷新整个网页的情况下实时�
    const webpack = require('webpack');
    
    plugins: [
-           new webpack.HotModuleReplacementPlugin()  //启用 HMR
+           new webpack.HotModuleReplacementPlugin()  //启用 HMR (webpack 4)
    ],
    
    devServer:{
@@ -414,14 +436,14 @@ DevServer 支持模块热替换, 可在不刷新整个网页的情况下实时�
 
    ```
    package.json 的 script字段添加如下：
-   "dev": "webpack-dev-server"
+   "start": "webpack-dev-server"
    
-   执行 npm run dev bug：会自动打开http://0.0.0.0:3000
+   执行 npm start
    ```
 
 4. http://192.168.1.87:3000/A.html
 
-#### 3.5.1 open-browser-webpack-plugin 
+#### 3.5.2 open-browser-webpack-plugin 
 
 1. 本地安装
 
@@ -439,7 +461,7 @@ DevServer 支持模块热替换, 可在不刷新整个网页的情况下实时�
    ]
    ```
 
-3. 执行 npm run dev后，会自动打开http://192.168.1.87:3000/A.html页。
+3. 执行 npm start后，会自动打开http://192.168.1.87:3000/A.html页。
 
 ### 3.6 加载样式
 
@@ -449,7 +471,7 @@ webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
 
 处理css文件，需要用到以下两个loader：
 
-* **css-loader **负责解析 CSS 代码，主要是为了处理 CSS 中的依赖，例如 @import 和 url() 等引用外部文件的声明。
+* **css-loader ** 负责解析 CSS 代码，主要是为了处理 CSS 中的依赖，例如 @import 和 url() 等引用外部文件的声明。
 * **style-loader** 会将 css-loader 解析的结果转变成 JS 代码，运行时动态插入 style 标签来让 CSS 代码生效。
 
 1. 本地安装loader
@@ -484,7 +506,7 @@ webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
 
 先将SCSS转成CSS，后续处理同上。
 
-1. 本地安装loader: sass-loader用于将scss转成css，而sass-loader依赖node-sass。
+1. 本地安装
 
    ```
    npm i -D sass-loader node-sass 
@@ -505,7 +527,7 @@ webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
 
 ### 3.7 加载静态资源
 
-#### 3.7.1 file-loader & url-loader
+#### 3.7.1 加载图片&字体
 
 file-loader, url-loader可用于处理图片，字体等静态资源。
 
@@ -526,24 +548,35 @@ url-loader封装了file-loader：
    module: {
        rules: [
            {
-               test: /\.(png|svg|jpg|gif|woff|tff|)$/,
-               use: [{
-                   loader: 'url-loader',
-                   options: {
-                       limit: 1024 * 30,         //30KB 以下的文件采用 url-loader
-                       fallback: 'file-loader',  //否则采用 file-loader，默认值就是 file-loader
-                       outputPath: 'images',     //图片输出路径
-                   }
-               }]
-           },
+                   test: /\.(png|svg|jpg|gif)$/,
+                   use: [{
+                       loader: 'url-loader',
+                       options: {
+                           limit: 1024 * 30,         //30KB 以下的文件采用 url-loader
+                           fallback: 'file-loader',  //否则采用 file-loader，默认值就是 file-loader
+                           outputPath: 'images',     //图片输出路径，相对于output.path
+                       }
+                   }]
+               },
+               {
+                   test: /\.(eot|ttf|woff|svg)$/,
+                   use: [{
+                       loader: 'url-loader',
+                       options: {
+                           limit: 1024 * 30,         //30KB 以下的文件采用 url-loader
+                           fallback: 'file-loader',  //否则采用 file-loader，默认值就是 file-loader
+                           outputPath: 'fonts',      //字体输出路径
+                       }
+                   }]
+               },
        ]
    },
    ```
 
 3. 编译后:
 
-   * 大于30KB的图片，用file-loader处理，复制到dist/images目录下。
-   * 小于30KB的图片，和js一起打包，形成dataURL形式。
+   * 大于30KB的资源，用file-loader处理，复制到dist/images目录下。
+   * 小于30KB的资源，和js一起打包，形成dataURL形式。
 
 #### 3.7.2 copy-webpack-plugin
 
@@ -553,6 +586,7 @@ url-loader封装了file-loader：
 
    ```
    npm i copy-webpack-plugin -D
+   
    ```
 
 2. 配置webpack
@@ -563,7 +597,7 @@ url-loader封装了file-loader：
    plugins:[
        new CopyWebpackPlugin([{
            from:path.resolve(__dirname, 'src/assets/public'),  //将此目录下的文件
-           to:'./public'                            //输出到此目录，相对于output的path目录
+           to:'./public'                            //输出到此目录，相对于output.path目录
        }])
    ]
    ```
@@ -588,6 +622,7 @@ url-loader封装了file-loader：
          $: 'jquery', 
        })
    ]
+   
    ```
 
 3. 在JS文件中就可直接使用jquery，不用导入。
@@ -648,7 +683,7 @@ webpack打包的文件都放在dist文件夹下，但webpack无法追踪到哪�
 
    ```
    "build": "webpack --config webpack.prod.js",
-   "dev": "webpack-dev-server --config webpack.dev.js"
+   "start": "webpack-dev-server --config webpack.dev.js"
    ```
 
 #### 3.9.3 source map 
@@ -657,7 +692,6 @@ React, ES6等经过webpack转换后，代码可读性非常差，不利于在浏
 
 ```
 devtool: "cheap-module-eval-source-map"  //开发环境
-devtool: "hidden-source-map"             //生产环境
 ```
 
 ## 4. 优化
@@ -739,6 +773,8 @@ module.exports = {
        ]
      }
    }
+   
+   注：在Webpack4上用extract-text-webpack-plugin会出错，可以安装beta版本extract-text-webpack-plugin@next。
    ```
 
 3. 配置webpack：压缩css文件
@@ -784,14 +820,14 @@ HtmlWebpackPlugin支持压缩输出的HTML文件。
 
    ```
    {
-       test: /\.(png|svg|jpg|gif|woff|tff|)$/,
+       test: /\.(png|svg|jpg|gif)$/,
        use: [
            {
                loader: 'url-loader',
                options: {
-               limit: 1024 * 30,         
-               fallback: 'file-loader',  
-               outputPath: 'images',    
+                   limit: 1024 * 30,         
+                   fallback: 'file-loader',  
+                   outputPath: 'images',    
                }
            },
        	'image-webpack-loader'        //压缩图片
@@ -847,6 +883,8 @@ Tree Shaking要求：
 
    ```
    "sideEffects": false,
+   
+   注：此字段是webpack4新增的。
    ```
 
 5. 开启压缩，参照4.2.1
@@ -864,7 +902,7 @@ webpack 4.X 会默认对代码进行拆分，拆分的规则是：
 - 在按需加载时，请求数量小于等于5。
 - 在初始化加载时，请求数量小于等于3。
 
-webpack 4.x 通过optimization.splitChunks配置, webpack 4.x之前可用CommonsChunkPlugin。
+注：webpack 4.x 通过optimization.splitChunks配置, webpack 4.x之前可用CommonsChunkPlugin。
 
 简单配置：
 
@@ -943,7 +981,7 @@ babel-loader:
 exclude: path.resolve(__dirname, 'node_modules')
 
 url-loader：
-include: path.resolve(__dirname, 'src','assets')
+include: path.resolve(__dirname, 'src/assets')
 ```
 
 ### 4.6 Resolve
@@ -1008,7 +1046,7 @@ module.exports = {
 ```
 resolve:{
   alias:{
-    'assets': path.resolve(__dirname, 'src','assets')   //把导入语句里的 assets 关键字替换成 xx/src/assets/
+    'assets': path.resolve(__dirname, 'src','assets')   //把导入语句里的 assets 关键字替换成 根目录/src/assets/
   }
 }
 ```
@@ -1025,13 +1063,13 @@ css中的url不支持。
 
    ```
    npm i -D eslint eslint-loader eslint-plugin-react
-   
    ```
 
 2. 初始化eslint配置
 
    ```
    eslint --init
+   
    ```
 
 3. 配置webpack
@@ -1052,3 +1090,5 @@ css中的url不支持。
    ```
 
 4. 编译时会用eslint进行代码检查，并显示错误。
+
+ 
