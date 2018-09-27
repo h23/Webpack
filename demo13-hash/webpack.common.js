@@ -11,7 +11,7 @@ module.exports={
         B: './src/pages/B/B.js',
     },
     output:{                   //出口配置
-        filename:'[name].bundle.js',  //多入口打包输出多出口时，filename不能是固定的；[name]代表chunk名称
+        filename:'[name].[chunkhash:8].bundle.js',  //多入口打包输出多出口时，filename不能是固定的；[name]代表chunk名称
         path: path.resolve(__dirname, 'dist')  //出口文件路径
     },
     module: {
@@ -45,7 +45,6 @@ module.exports={
                             ]
                         }
                     },
-                    "eslint-loader"          //先使用eslint-loader处理后，在由babel-loader转换
                 ],
                 exclude: path.resolve(__dirname, 'node_modules')
             },
@@ -108,7 +107,7 @@ module.exports={
             $: 'jquery',
         }),
         new MiniCssExtractPlugin({
-            filename: "[name].css",    //同output.filename
+            filename: "[name].[contenthash:8].css",    //同output.filename
         }),
     ],
     resolve: {

@@ -55,7 +55,7 @@ module.exports={
             template:'template.html'
         }),
         new webpack.HotModuleReplacementPlugin(),  //启用 HMR
-        new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' })  //开启服务后，自动打开的地址
+        // new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' })  //开启服务后，自动打开的地址
     ],
     devServer:{
         hot: true,                 //开启模块热替换
@@ -64,6 +64,6 @@ module.exports={
         host: '0.0.0.0',           //DevServer 服务监听的地址，默认是localhost。当需要同个局域网可访问你的服务时，可设成0.0.0.0
         port: 3000,                //DevServer 服务监听的端口，默认8080
         https: false,              //是否使用HTTPS服务
-        // open: true                 //自动打开网页
+        open: true                 //自动打开网页
     },
 };

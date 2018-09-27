@@ -12,7 +12,7 @@ module.exports={
     },
     output:{                   //出口配置
         filename:'[name].bundle.js',  //多入口打包输出多出口时，filename不能是固定的；[name]代表chunk名称
-        path: path.resolve(__dirname, 'dist')  //出口文件路径
+        path: path.resolve(__dirname, 'dist'),  //出口文件路径
     },
     module: {
         rules: [

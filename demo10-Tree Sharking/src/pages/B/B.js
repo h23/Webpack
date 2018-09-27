@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-require('./b.scss');
+import './b.scss';
 
 class B extends Component {
     render() {

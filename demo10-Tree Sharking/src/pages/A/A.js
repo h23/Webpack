@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
-require('./a.css');
-import { funcA } from '../../util';
+import './a.css';
+import { funcA, funcB } from '../../util';
 
 class A extends Component {
 

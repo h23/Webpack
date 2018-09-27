@@ -15,6 +15,6 @@ module.exports = merge(common, {
         minimizer: [            //用于指定使用的压缩插件或自定义UglifyjsWebpackPlugin插件配置，覆盖默认配置。
             new UglifyJsPlugin({}),
             new OptimizeCSSAssetsPlugin({})  //压缩css
-        ]
+        ],
     },
 });
