@@ -20,7 +20,7 @@ module.exports={
                 options: {               //传入loader的参数
                     presets: [           //用于解析一组语法特性
                         [
-                            "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                            "@babel/preset-env",       //包含当前所有 ECMAScript 标准里的最新特性
                             {
                                 "targets": {   //指定需要兼容的浏览器类型和版本
                                     "browsers": [
@@ -30,13 +30,14 @@ module.exports={
                                 }
                             }
                         ],
-                        "react"
+                        "@babel/preset-react"
                     ],
                     plugins: [         //用于解析某个语法特性
-                        "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
-                        "transform-export-extensions",  //解析额外的export语法
-                        "transform-class-properties",   //解析class中的静态属性
-                        "syntax-dynamic-import"         //解析import方法
+                        "@babel/plugin-proposal-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                        "@babel/plugin-proposal-export-default-from",  //解析额外的export语法
+                        "@babel/plugin-proposal-export-namespace-from",
+                        "@babel/plugin-proposal-class-properties",   //解析class中的静态属性
+                        "@babel/plugin-syntax-dynamic-import"         //解析import方法
                     ]
                 }
             }
@@ -54,8 +55,8 @@ module.exports={
             filename:'B.html',
             template:'template.html'
         }),
-        new webpack.HotModuleReplacementPlugin(),  //启用 HMR
-        // new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' })  //开启服务后，自动打开的地址
+        new webpack.HotModuleReplacementPlugin(),  //启用 HMR, webpack 4
+        new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' })  //开启服务后，自动打开的地址
     ],
     devServer:{
         hot: true,                 //开启模块热替换
@@ -64,6 +65,6 @@ module.exports={
         host: '0.0.0.0',           //DevServer 服务监听的地址，默认是localhost。当需要同个局域网可访问你的服务时，可设成0.0.0.0
         port: 3000,                //DevServer 服务监听的端口，默认8080
         https: false,              //是否使用HTTPS服务
-        open: true                 //自动打开网页
+        open: false                 //自动打开网页
     },
 };

@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import ReactDOM from 'react-dom';
+// import ReactDOM from 'react-dom';
 import './a.css';
 
 class A extends Component {
     render() {
         $("body").css("background-color","gray")
-        return <h1>Hello word! I'm A.</h1>
+        return <h1>Hello word! I'm A.ReactDOM</h1>
     }
 }
 ReactDOM.render(<A />, document.getElementById('app'));

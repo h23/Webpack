@@ -1,7 +1,6 @@
 class Ui {
     constructor(name, age) {
         this.name = name;
-        this.age = age;
     }
 
     coding() {
@@ -9,6 +8,6 @@ class Ui {
     }
 }
 
-let ui= new Ui('hqz','18');
+let ui= new Ui('hqz');
 
 document.getElementById('app').innerText=ui.coding();

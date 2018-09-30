@@ -22,7 +22,7 @@ module.exports={
                     options: {               //传入loader的参数
                         presets: [           //用于解析一组语法特性
                             [
-                                "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                                "@babel/preset-env",       //包含当前所有 ECMAScript 标准里的最新特性
                                 {
                                     "targets": {   //指定需要兼容的浏览器类型和版本
                                         "browsers": [
@@ -32,13 +32,14 @@ module.exports={
                                     }
                                 }
                             ],
-                            "react"
+                            "@babel/preset-react"
                         ],
                         plugins: [         //用于解析某个语法特性
-                            "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
-                            "transform-export-extensions",  //解析额外的export语法
-                            "transform-class-properties",   //解析class中的静态属性
-                            "syntax-dynamic-import"         //解析import方法
+                            "@babel/plugin-proposal-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                            "@babel/plugin-proposal-export-default-from",  //解析额外的export语法
+                            "@babel/plugin-proposal-export-namespace-from",
+                            "@babel/plugin-proposal-class-properties",   //解析class中的静态属性
+                            "@babel/plugin-syntax-dynamic-import"         //解析import方法
                         ]
                     }
                 }
@@ -95,11 +96,11 @@ module.exports={
             filename:'B.html',
             template:'template.html'
         }),
-        new webpack.HotModuleReplacementPlugin(),  //启用 HMR
-        new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' }), //开启服务后，自动打开的地址
+        new webpack.HotModuleReplacementPlugin(),  // 启用 HMR
+        new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' }), // 开启服务后，自动打开的地址
         new CopyWebpackPlugin([{
-            from:path.resolve(__dirname, 'src/assets/public'),  //将此目录下的文件
-            to:'./public'                                       //输出到此目录，相对于output的path目录
+            from: './src/assets/public',  // 将此目录下的文件
+            to:'./public'                 // 输出到此目录，相对于output的path目录
         }]),
     ],
     devServer:{

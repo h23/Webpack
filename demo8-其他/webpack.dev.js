@@ -4,7 +4,6 @@ const webpack = require('webpack');
 const OpenBrowserPlugin = require('open-browser-webpack-plugin');
 
 module.exports = merge(common, {
-    mode: "development",
     plugins: [
         new webpack.HotModuleReplacementPlugin(),
         new OpenBrowserPlugin({ url: 'http://192.168.1.87:3000/A.html' }), //开启服务后，自动打开的地址

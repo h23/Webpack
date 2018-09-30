@@ -15,7 +15,7 @@ module.exports={
                 options: {               //传入loader的参数
                     presets: [           //用于解析一组语法特性
                         [
-                            "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                            "@babel/preset-env",       //包含当前所有 ECMAScript 标准里的最新特性
                             {
                                 "targets": {   //指定需要兼容的浏览器类型和版本
                                     "browsers": [
@@ -25,13 +25,14 @@ module.exports={
                                 }
                             }
                         ],
-                        "react"
+                        "@babel/preset-react"
                     ],
                     plugins: [         //用于解析某个语法特性
-                        "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
-                        "transform-export-extensions",  //解析额外的export语法
-                        "transform-class-properties",   //解析class中的静态属性
-                        "syntax-dynamic-import"         //解析import方法
+                        "@babel/plugin-proposal-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                        "@babel/plugin-proposal-export-default-from",  //解析额外的export语法
+                        "@babel/plugin-proposal-export-namespace-from",
+                        "@babel/plugin-proposal-class-properties",   //解析class中的静态属性
+                        "@babel/plugin-syntax-dynamic-import"         //解析import方法
                     ]
                 }
             }

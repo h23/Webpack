@@ -57,6 +57,8 @@ NodeJS版本10.4.1。
 
 2. 本地安装webpack
 
+   webpack4版本命名行相关的功能独立到Webpack-cli。
+
    ```
    npm i webpack webpack-cli -D
    ```
@@ -64,7 +66,7 @@ NodeJS版本10.4.1。
 3. 新建webpack.config.js 配置文件。
 
    ```
-   webpack默认会查找webpack.config.js作为配置文件。
+   webpack默认会查找 webpack.config.js 作为配置文件。
    
    自定义配置文件名称：
    webpack --config xx.js
@@ -159,11 +161,32 @@ NodeJS版本10.4.1。
 
 babel可以方便的完成以上2件事。 babel-preset-env的工作方式类似于babel-preset-latest，但它允许您指定环境并仅转换该环境中缺少的功能。
 
+babel 7.X的主要变更：
+
+- 删除对未维护的 Node 版本的支持：0.10,0.12,2,5
+- 删除“Stage” & 年度预设（preset-es2015 等）， 用@babel/preset-env 取代。
+- 对部分软件包进行重命名（e.g. babel-core-->@babel/core）
+
+简单升级：
+
+1. 利用babel-upgrade
+
+   ```
+   npm i babel-upgrade -g
+   babel-upgrade --write
+   ```
+
+2. 重新安装包
+
+3. 修改配置文件中的包名
+
+配置：
+
 1. 本地安装Babel
 
    ```
-   npm i -D babel-loader babel-core babel-preset-env
-   babel-plugin-transform-object-rest-spread babel-plugin-transform-export-extensions babel-plugin-transform-class-properties babel-plugin-syntax-dynamic-import
+   npm i -D @babel/core @babel/preset-env babel-loader
+   @babel/plugin-transform-object-rest-spread @babel/plugin-transform-export-extensions @babel/plugin-transform-class-properties @babel/plugin-syntax-dynamic-import
    ```
 
 2. 配置webpack
@@ -178,7 +201,7 @@ babel可以方便的完成以上2件事。 babel-preset-env的工作方式类似
                    options: {               //传入loader的参数
                        presets: [           //用于解析一组语法特性
                            [
-                               "env",       //包含当前所有 ECMAScript 标准里的最新特性
+                               "@babel/preset-env",       //包含当前所有 ECMAScript 标准里的最新特性
                                {
                                    "targets": {   //指定需要兼容的浏览器类型和版本
                                        "browsers": [
@@ -190,10 +213,11 @@ babel可以方便的完成以上2件事。 babel-preset-env的工作方式类似
                            ]
                        ],
                        plugins: [         //用于解析某个语法特性
-                           "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
-                           "transform-export-extensions",  //解析额外的export语法
-                           "transform-class-properties",   //解析class中的静态属性
-                           "syntax-dynamic-import"         //解析import方法
+                           "@babel/plugin-proposal-object-rest-spread", //解析对象的扩展运算符（ES2018）
+                           "@babel/plugin-proposal-export-default-from",  //解析额外的export语法:export v from "xx/xx"
+                           "@babel/plugin-proposal-export-namespace-from", //解析额外的export语法:export v as vv from "xx/xx";
+                           "@babel/plugin-proposal-class-properties",   //解析class中的静态属性
+                           "@babel/plugin-syntax-dynamic-import"         //解析import方法
                        ]
                    }
                }
@@ -244,7 +268,7 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
 1. 本地安装babel-preset-react
 
    ```
-   npm i -D babel-preset-react
+   npm i -D @babel/preset-react
    ```
 
 2. 配置webpack (在ES6环境的基础上)
@@ -257,7 +281,7 @@ Babel也可用于解析JSX，需要使用babel-preset-react。
                use: {
                    loader: "babel-loader", 
                    options: {               
-                       presets: ["env","react"]  //用于解析ES6+React
+                       presets: ["@babel/preset-env","@babel/preset-react"]  //用于解析ES6+React
                    }
                }
    
@@ -470,7 +494,7 @@ webpack本身只认得JS文件，其他非JS文件需要用loader进行转换。
 
 处理css文件，需要用到以下两个loader：
 
-* **css-loader ** 负责解析 CSS 代码，主要是为了处理 CSS 中的依赖，例如 @import 和 url() 等引用外部文件的声明。
+* **css-loader** 负责解析 CSS 代码，主要是为了处理 CSS 中的依赖，例如 @import 和 url() 等引用外部文件的声明。
 * **style-loader** 会将 css-loader 解析的结果转变成 JS 代码，运行时动态插入 style 标签来让 CSS 代码生效。
 
 1. 本地安装loader
@@ -579,7 +603,7 @@ url-loader封装了file-loader：
 
 #### 3.7.2 copy-webpack-plugin
 
-将不需要webpack处理的静态资源，原样输出到指定目录下。
+将不需要webpack处理的静态资源（e.g. favicon），原样输出到指定目录下。
 
 1. 本地安装
 
@@ -594,8 +618,8 @@ url-loader封装了file-loader：
    
    plugins:[
        new CopyWebpackPlugin([{
-           from:path.resolve(__dirname, 'src/assets/public'),  //将此目录下的文件
-           to:'./public'                            //输出到此目录，相对于output.path目录
+           from: './src/assets/public',  // 将此目录下的文件
+           to:'./public'                 // 输出到此目录，相对于output.path目录
        }])
    ]
    ```
@@ -687,6 +711,8 @@ webpack打包的文件都放在dist文件夹下，但webpack无法追踪到哪�
 #### 3.9.3 source map 
 
 React, ES6等经过webpack转换后，代码可读性非常差，不利于在浏览器中调试代码。可通过加载 Source Map 文件，在浏览器中调试源码。
+
+各种source map的差异见：https://github.com/webpack/webpack/tree/master/examples/source-map
 
 ```
 devtool: "cheap-module-eval-source-map"  //开发环境
