@@ -827,6 +827,8 @@ HtmlWebpackPlugin支持压缩输出的HTML文件。
     	template:'src/index.html', 
     	minify:{                     //压缩输出
             collapseWhitespace:true   //折叠空白区域
+            minifyCSS: true, 	// 压缩 HTML 中出现的 CSS 代码
+        	minifyJS: true 		// 压缩 HTML 中出现的 JS 代码
     	}
     })
 ]
@@ -866,7 +868,7 @@ Tree Shaking 可以用来剔除 JavaScript 中用不上的代码。
 Tree Shaking要求：
 
 - 必须遵循 ES6 的模块规范（即 import 和 export）。
-- 在项目 `package.json` 文件中，添加一个 "sideEffects" 属性。
+- 在项目 `package.json` 文件中，添加一个 "sideEffects" 属性。作为第三方包？
 - 引入一个能够删除未引用代码(dead code)的压缩工具(minifier)（例如 `UglifyJSPlugin`）。
 
 1. 新建util.js
@@ -917,7 +919,13 @@ Tree Shaking要求：
 
 提取公共代码的原理：用户第一次访问页面后，页面公共代码的文件已经被浏览器缓存起来。用户切换到其它页面时，存放公共代码的文件就不会再重新加载，而是直接从缓存中获取。 加快了其他页面的访问速度，减少了网络传输流量。
 
-webpack 4.X 会默认对代码进行拆分，拆分的规则是：
+3种拆分方案浏览器的加载情况：
+
+* 未拆分代码：所有代码被打包到一个JS文件中，当修改了代码，浏览器就得重新加载所有代码。
+* 拆分公共代码：代码被打包成两个JS文件（公共代码 & 其余代码），修改其中一个文件的代码，浏览器只需要重新加载修改的代码文件。但第三方库的代码也属于公共代码，若修改了非第三方库的公共代码，那么浏览器也会重新加载不常变更的第三方库代码。
+* 拆分公共代码&第三方库：代码被打包成3个以上的JS文件。
+
+mode=production时，webpack 4.X 会默认对代码进行拆分，拆分的规则是：
 
 - 模块被重复引用，或者是来自`node_modules`中的模块。
 - 文件大于30kb。
@@ -1025,6 +1033,22 @@ include: path.resolve(__dirname, 'src/assets')
 
 Webpack 在启动后会从配置的入口模块出发找出所有依赖的模块，Resolve 配置 Webpack 如何寻找模块所对应的文件。 
 
+模块引入方式：
+
+```
+import * as m from './index.js'   // 相对路径
+import React from 'react'         // 模块名
+```
+
+- 解析相对路径
+  1. 查找相对当前模块的路径下是否有对应文件或文件夹
+  2. 是文件则直接加载
+  3. 是文件夹则继续查找文件夹下的 package.json 文件
+  4. 有 package.json 文件则按照文件中 browser/module/main 字段的文件名来查找文件 (配置项：resolve.mainFields )
+  5. 无 package.json 或者无 browser/module/main字段则查找 index.js 文件  (配置项：resolve.mainFiles) 
+- 解析模块名
+  1. 查找当前文件目录下，父级目录及以上目录下的 node_modules 文件夹，看是否有对应名称的模块  (配置项：resolve.modules) 
+
 #### 4.6.1 resolve.modules
 
 resolve.modules 用于配置 Webpack 去哪些目录下寻找第三方模块。
@@ -1092,6 +1116,11 @@ resolve:{
 
 css中的url不支持。
 
+解决在webstorm中无法解析alias后的路径：
+
+1. 在webpack settings中指定webpack配置文件的路径。
+2. 由于我们脚手架的webpack配置中resolve.alias配置是直接写在alias字段下的，webstorm无法解析。所以需要在配置文件中配置resolve.alias字段。
+
 ### 4.7 Hash
 
 在打包出来的文件名上加上文件内容的`hash`是目前最常见的有效使用浏览器长缓存的方法，js文件如果有内容更新，`hash`就会更新，浏览器请求路径变化所以更新缓存，如果js内容不变，`hash`不变，直接用缓存。
@@ -1116,3 +1145,70 @@ plugins:[
     ],
 ```
 
+### 4.8 遗留
+
+#### 4.8.1 热更新 （react-hot-loader）
+1. 安装
+
+   ```
+   yarn add react-hot-loader
+   ```
+
+2. webpack配置
+
+   ```
+   1.使用HotModuleReplacementPlugin插件
+       plugins: [
+           new webpack.HotModuleReplacementPlugin(),
+       ],
+   2.开启devServer的模块热替换
+       devServer:{
+           hot: true,                 //开启模块热替换
+       },
+   3.在babel-loader中使用react-hot-loader/babel插件
+       plugins: ["react-hot-loader/babel"             
+   ```
+
+3. ##### 入口文件设置
+
+   ```
+   import React, { Component } from 'react';
+   import { AppContainer } from 'react-hot-loader';  
+   import ReactDOM from 'react-dom';
+   require('./a.css');
+   import Test from './Test';
+   
+   
+   function render(RootElement) {
+     ReactDOM.render(
+       <AppContainer>
+         <RootElement />
+       </AppContainer>,
+       document.getElementById('app')
+     );
+   }
+   
+   render(Test);
+   
+   if (module.hot) {
+     module.hot.accept('./Test', () => {
+       render(Test);
+     });
+   }
+   ```
+
+#### 4.8.2 Proxy
+
+proxy 用于配置 webpack-dev-server 将特定 URL 的请求代理到另外一台服务器上。例如：
+
+```
+proxy: {
+    '/api/test': {
+        target: "http://localhost:3000", // 将URL中带有/api/test的请求代理到本地的3000端口的服务上
+        pathRewrite: { '^/api': '' }, // 把URL中path部分的api移除掉
+    },
+}
+```
+
+1. 请求到 `/api/test` 会被代理到请求 `http://localhost:3000/api/users`。
+2. 请求到 `/api/test` 会被代理到请求 `http://localhost:3000/users`。

@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './a.css';
-import { funcA, funcB } from '../../util';
+import { funcA, funcB } from '../../util/util';
 
 class A extends Component {
 

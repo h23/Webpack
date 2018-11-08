@@ -1,8 +1,8 @@
+const path=require("path");
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
-const path=require('path');
 
 
 module.exports={
@@ -11,7 +11,7 @@ module.exports={
         B: './src/pages/B/B.js',
     },
     output:{                   //出口配置
-        filename:'[name].[chunkhash:8].bundle.js',  //多入口打包输出多出口时，filename不能是固定的；[name]代表chunk名称
+        filename:'[name].[hash:8].bundle.js',  //多入口打包输出多出口时，filename不能是固定的；[name]代表chunk名称
         path: path.resolve(__dirname, 'dist')  //出口文件路径
     },
     module: {
@@ -41,7 +41,8 @@ module.exports={
                                 "transform-object-rest-spread", //解析对象的扩展运算符（ES2018）
                                 "transform-export-extensions",  //解析额外的export语法
                                 "transform-class-properties",   //解析class中的静态属性
-                                "syntax-dynamic-import"         //解析import方法
+                                "syntax-dynamic-import",         //解析import方法
+                                "react-hot-loader/babel"
                             ]
                         }
                     },
